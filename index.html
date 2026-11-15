@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OntoMuseos · Ontología y visualización semántica para museos virtuales locales</title>
+<meta name="description" content="OntoMuseos (UNIR, programa INCENTIVA 2024-2025): ontología, grafo de conocimiento y sistema de visualización y recuperación de información para museos virtuales nativos digitales de ámbito local.">
+<style>
+  :root{
+    --tinta:#1d2730; --suave:#5d6873; --acento:#9a4a1c; --acento-osc:#6e3212;
+    --fondo:#ffffff; --fondo-alt:#f6f2ec; --linea:#e6ded3; --oscuro:#1d2730;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tinta);background:var(--fondo);line-height:1.6;font-size:17px}
+  a{color:var(--acento)}
+  a:hover,a:focus{color:var(--acento-osc)}
+  :focus-visible{outline:3px solid var(--acento);outline-offset:2px}
+  .contenedor{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+  .saltar{position:absolute;left:-999px;top:0;background:#fff;padding:.5rem 1rem;z-index:10}
+  .saltar:focus{left:1rem}
+
+  /* Cabecera */
+  header.barra{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--linea)}
+  .barra .contenedor{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .logo{font-family:Georgia,"Times New Roman",serif;font-size:1.45rem;text-decoration:none;color:var(--tinta);letter-spacing:.01em}
+  .logo b{color:var(--acento);font-weight:normal}
+  nav.menu ul{list-style:none;display:flex;gap:1.6rem;margin:0;padding:0}
+  nav.menu a{text-decoration:none;color:var(--tinta);font-size:.95rem}
+  nav.menu a:hover{color:var(--acento)}
+  .boton-menu{display:none;background:none;border:1px solid var(--linea);border-radius:4px;padding:.4rem .7rem;font-size:.95rem;cursor:pointer}
+
+  /* Portada */
+  .portada{background:linear-gradient(120deg,#1d2730 0%,#3a2a20 100%);color:#fff;padding:5.5rem 0 5rem}
+  .portada .etiqueta{text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;color:#e8c9a8;margin:0 0 1rem}
+  .portada h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:2.5rem;line-height:1.2;margin:0 0 1.2rem;max-width:22ch}
+  .portada p{max-width:60ch;font-size:1.1rem;color:#e9e4de;margin:0 0 2rem}
+  .boton{display:inline-block;background:var(--acento);color:#fff;text-decoration:none;padding:.75rem 1.4rem;border-radius:3px;font-size:.95rem}
+  .boton:hover,.boton:focus{background:var(--acento-osc);color:#fff}
+  .boton.claro{background:transparent;border:1px solid #e8c9a8;color:#fff;margin-left:.6rem}
+
+  /* Secciones */
+  section{padding:4.5rem 0}
+  section.alt{background:var(--fondo-alt)}
+  h2{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:1.9rem;margin:0 0 .5rem}
+  .subtitulo{color:var(--suave);margin:0 0 2.2rem;max-width:65ch}
+  .dos{display:grid;grid-template-columns:1.3fr 1fr;gap:3rem;align-items:start}
+  .dato{border-left:3px solid var(--acento);padding:.2rem 0 .2rem 1rem;margin-bottom:1.2rem}
+  .dato strong{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--suave)}
+
+  /* Tarjetas */
+  .tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem}
+  .tarjeta{background:#fff;border:1px solid var(--linea);border-radius:4px;padding:1.6rem;display:flex;flex-direction:column}
+  .tarjeta h3{margin:0 0 .6rem;font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase}
+  .tarjeta p{margin:0 0 1.2rem;color:var(--suave);flex:1}
+  .tarjeta a.enlace{font-weight:600;text-decoration:none}
+  .pendiente{color:var(--suave);font-style:italic}
+
+  ol.objetivos{counter-reset:o;list-style:none;padding:0;margin:0}
+  ol.objetivos li{counter-increment:o;position:relative;padding:0 0 1.2rem 3rem}
+  ol.objetivos li::before{content:counter(o);position:absolute;left:0;top:0;width:2rem;height:2rem;border-radius:50%;background:var(--acento);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+
+  .equipo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem;list-style:none;padding:0;margin:0}
+  .equipo li{background:#fff;border:1px solid var(--linea);border-radius:4px;padding:1.2rem}
+  .equipo strong{display:block;font-size:1.05rem}
+  .equipo .rol{color:var(--acento);font-size:.85rem;text-transform:uppercase;letter-spacing:.06em}
+  .equipo .inst{color:var(--suave);font-size:.92rem}
+
+  ul.produccion{list-style:none;padding:0;margin:0}
+  ul.produccion li{padding:1rem 0;border-bottom:1px solid var(--linea)}
+  ul.produccion .tipo{display:inline-block;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--acento);margin-bottom:.2rem}
+
+  .entidades{display:flex;flex-wrap:wrap;gap:1rem}
+  .entidad{border:1px solid var(--linea);background:#fff;border-radius:4px;padding:1rem 1.4rem;min-width:220px}
+  .entidad span{display:block;font-size:.8rem;color:var(--suave);text-transform:uppercase;letter-spacing:.06em}
+
+  footer{background:var(--oscuro);color:#cfd6dc;padding:3rem 0 2rem;font-size:.9rem}
+  footer .contenedor{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:2rem}
+  footer a{color:#fff}
+  footer .logo{color:#fff}
+  footer .pie{grid-column:1/-1;border-top:1px solid #33414c;padding-top:1.2rem;margin-top:1rem;color:#9aa7b2}
+
+  @media (max-width:860px){
+    .dos{grid-template-columns:1fr}
+    footer .contenedor{grid-template-columns:1fr}
+    .boton-menu{display:block}
+    nav.menu{display:none;position:absolute;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid var(--linea)}
+    nav.menu.abierto{display:block}
+    nav.menu ul{flex-direction:column;gap:0;padding:.5rem 1.5rem 1rem}
+    nav.menu li a{display:block;padding:.6rem 0}
+    .portada h1{font-size:1.9rem}
+    .boton.claro{margin:.6rem 0 0}
+  }
+</style>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<header class="barra">
+  <div class="contenedor">
+    <a class="logo" href="#inicio">Onto<b>Museos</b></a>
+    <button class="boton-menu" aria-expanded="false" aria-controls="menu">Menú</button>
+    <nav class="menu" id="menu" aria-label="Menú principal">
+      <ul>
+        <li><a href="#proyecto">El proyecto</a></li>
+        <li><a href="#objetivos">Objetivos</a></li>
+        <li><a href="#recursos">Recursos</a></li>
+        <li><a href="#equipo">Equipo</a></li>
+        <li><a href="#produccion">Producción</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="contenido">
+
+  <section class="portada" id="inicio">
+    <div class="contenedor">
+      <p class="etiqueta">Proyecto de transferencia · UNIR · INCENTIVA 2024-2025</p>
+      <h1>Ontología y visualización semántica para museos virtuales locales</h1>
+      <p>OntoMuseos desarrolla un modelo semántico abierto para que los museos virtuales nativos digitales de ámbito local organicen, relacionen y muestren su patrimonio cultural y natural, sus documentos, sus tradiciones y sus exposiciones.</p>
+      <a class="boton" href="#recursos">Ver los recursos</a>
+      <a class="boton claro" href="#proyecto">Conocer el proyecto</a>
+    </div>
+  </section>
+
+  <section id="proyecto">
+    <div class="contenedor dos">
+      <div>
+        <h2>El proyecto</h2>
+        <p>En los últimos años han surgido museos virtuales nativos digitales, sin un museo físico detrás, dedicados a una población, una comunidad o una región. Reúnen patrimonio cultural y natural, archivos documentales, hemerotecas, costumbres y memoria colectiva, y a menudo se construyen con la participación de la ciudadanía.</p>
+        <p>Las plataformas que los sostienen suelen organizar la información de forma casi plana, en colecciones al mismo nivel, lo que dificulta expresar las relaciones entre los elementos, hacer búsquedas avanzadas y aprovechar el museo para la educación y la investigación.</p>
+        <p>OntoMuseos aborda este problema mediante el modelado semántico de la información: una ontología de dominio, un grafo de conocimiento con datos abiertos y un sistema de visualización y búsqueda basado en la semántica, implantado sobre Omeka S. El caso de referencia es el <a href="https://museo.getafe.es/">Museo Virtual de Getafe</a>.</p>
+      </div>
+      <aside>
+        <div class="dato"><strong>Programa</strong>INCENTIVA, Plan Propio de Investigación de UNIR</div>
+        <div class="dato"><strong>Duración</strong>18 meses (curso 2024-2025)</div>
+        <div class="dato"><strong>Investigadora principal</strong>M.ª Luisa Díez Platas</div>
+        <div class="dato"><strong>Caso de referencia</strong>Museo Virtual de Getafe</div>
+        <div class="dato"><strong>Plataforma</strong>Omeka S</div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="alt" id="objetivos">
+    <div class="contenedor">
+      <h2>Objetivos</h2>
+      <p class="subtitulo">El proyecto quiere que el museo virtual deje de ser solo un espacio de exhibición y se convierta en una herramienta semánticamente enriquecida para el público, la educación y la investigación.</p>
+      <ol class="objetivos">
+        <li><strong>Modelo conceptual y ontología.</strong> Desarrollar una ontología de dominio modular para la información heterogénea de un museo virtual generalista y local, reutilizando ontologías existentes e integrando <a href="https://w3id.org/OntoExhibit/">OntoExhibit</a> para el modelado de las exposiciones.</li>
+        <li><strong>Visualización semántica.</strong> Diseñar un sistema de visualización basado en los módulos ontológicos, que supere las limitaciones de los gestores de contenidos tradicionales y permita explorar los elementos y sus relaciones.</li>
+        <li><strong>Búsqueda avanzada.</strong> Ofrecer un buscador facetado para consultas complejas, adaptado al público general, a docentes y a investigadores.</li>
+        <li><strong>Datos abiertos.</strong> Publicar la ontología y los datos en abierto, conforme a los estándares de la web semántica, para favorecer la interoperabilidad con otros museos y repositorios como Europeana.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="recursos">
+    <div class="contenedor">
+      <h2>Recursos</h2>
+      <p class="subtitulo">Resultados del proyecto disponibles en abierto.</p>
+      <div class="tarjetas">
+        <article class="tarjeta">
+          <h3>Ontología</h3>
+          <p>Ontología modular para museos virtuales locales en OWL, con un módulo de exposiciones alineado con OntoExhibit.</p>
+          <a class="enlace" href="https://github.com/OntoMuseos">Ver en GitHub →</a>
+        </article>
+        <article class="tarjeta">
+          <h3>Museo Virtual de Getafe</h3>
+          <p>Museo virtual de referencia del proyecto, impulsado por la Asociación de Amigos del Museo de Getafe.</p>
+          <a class="enlace" href="https://museo.getafe.es/">Visitar el museo →</a>
+        </article>
+        <article class="tarjeta">
+          <h3>Documentación</h3>
+          <p>Documentación de la ontología, modelos de datos y depósito con identificador persistente.</p>
+          <span class="pendiente">Depósito en Zenodo: próximamente</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="equipo">
+    <div class="contenedor">
+      <h2>Equipo</h2>
+      <p class="subtitulo">Equipo interdisciplinar de informática, humanidades digitales, museología y educación.</p>
+      <ul class="equipo">
+        <li><span class="rol">Investigadora principal</span><strong>M.ª Luisa Díez Platas</strong><span class="inst">Universidad Internacional de La Rioja</span></li>
+        <li><span class="rol">Investigadora</span><strong>Susana Quirós Alpera</strong><span class="inst">Universidad Internacional de La Rioja</span></li>
+        <li><span class="rol">Investigador</span><strong>Luis Pedraza Gómara</strong><span class="inst">Universidad Internacional de La Rioja</span></li>
+        <li><span class="rol">Investigadora externa</span><strong>Nuria Rodríguez Ortega</strong><span class="inst">Universidad de Málaga</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="produccion">
+    <div class="contenedor">
+      <h2>Producción</h2>
+      <p class="subtitulo">Publicaciones, comunicaciones y actividades de difusión del proyecto.</p>
+      <ul class="produccion">
+        <li><span class="tipo">Publicación</span><br><span class="pendiente">[Añadir referencia]</span></li>
+        <li><span class="tipo">Congreso</span><br><span class="pendiente">[Añadir referencia]</span></li>
+        <li><span class="tipo">Actividad</span><br><span class="pendiente">[Añadir referencia]</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="alt" id="colaboran">
+    <div class="contenedor">
+      <h2>Financian y colaboran</h2>
+      <div class="entidades">
+        <div class="entidad"><span>Financia</span>Universidad Internacional de La Rioja (UNIR) · Programa INCENTIVA</div>
+        <div class="entidad"><span>Colabora</span>Asociación de Amigos del Museo de Getafe</div>
+        <div class="entidad"><span>Colabora</span>Proyecto Complexhibit (PID2021-125037NB-I00)</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="contacto">
+  <div class="contenedor">
+    <div>
+      <p class="logo">OntoMuseos</p>
+      <p>Ontología y sistema de visualización y recuperación de información avanzada para museos virtuales nativos digitales de ámbito local.</p>
+    </div>
+    <div>
+      <p><strong>Contacto</strong><br>Universidad Internacional de La Rioja (UNIR)<br>[correo de contacto]</p>
+    </div>
+    <div>
+      <p><strong>Enlaces</strong><br>
+        <a href="https://github.com/OntoMuseos">GitHub</a><br>
+        <a href="https://museo.getafe.es/">Museo Virtual de Getafe</a><br>
+        <a href="https://w3id.org/OntoExhibit/">OntoExhibit</a></p>
+    </div>
+    <p class="pie">© 2026 OntoMuseos · Contenidos publicados con licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>.</p>
+  </div>
+</footer>
+
+<script>
+  const b = document.querySelector('.boton-menu'), m = document.getElementById('menu');
+  b.addEventListener('click', () => { const a = m.classList.toggle('abierto'); b.setAttribute('aria-expanded', a); });
+  m.querySelectorAll('a').forEach(x => x.addEventListener('click', () => { m.classList.remove('abierto'); b.setAttribute('aria-expanded', false); }));
+</script>
+</body>
+</html>
